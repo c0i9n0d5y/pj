@@ -39,9 +39,10 @@ To contextualize the study, we first examine the total baseline distribution of 
 
 ```{r}
 #| label: fig-pie
-#| fig-cap: "Proportional Distribution of Overall Heart Disease Diagnosis"
-#| fig-width: 4
+#| fig-cap: Proportional Distribution of Overall Heart Disease Diagnosis
 #| fig-height: 4
+#| fig-width: 4
+#| include: false
 pie_data <- data_clean %>%
   count(Target_Label) %>%
   mutate(fraction = n / sum(n),
@@ -65,9 +66,10 @@ Moving beyond baseline statistics, we evaluate clinical markers using a grouped 
 
 ```{r}
 #| label: fig-bar
-#| fig-cap: "Heart Disease Diagnosis Stratified by Clinical Chest Pain Type"
-#| fig-width: 6
+#| fig-cap: Heart Disease Diagnosis Stratified by Clinical Chest Pain Type
 #| fig-height: 3.5
+#| fig-width: 6
+#| include: false
 ggplot(data_clean, aes(x = CP_Label, fill = Target_Label)) +
   geom_bar(position = "dodge", alpha = 0.9) +
   scale_fill_manual(values = c("#2b7bba", "#d95f02")) +
@@ -82,9 +84,10 @@ Finally, we implement a continuous density plot to examine the demographic distr
 
 ```{r}
 #| label: fig-density
-#| fig-cap: "Smoothed Probability Density Distribution of Age by Diagnosis"
-#| fig-width: 6
+#| fig-cap: Smoothed Probability Density Distribution of Age by Diagnosis
 #| fig-height: 3.5
+#| fig-width: 6
+#| include: false
 ggplot(data_clean, aes(x = age, fill = Target_Label)) +
   geom_density(alpha = 0.5) +
   scale_fill_manual(values = c("#2b7bba", "#d95f02")) +
