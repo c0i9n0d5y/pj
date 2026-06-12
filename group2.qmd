@@ -1,0 +1,104 @@
+---
+title: "Heart Disease Prediction + X? "
+author: "Andrew, Cindy, Darwin"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(ggplot2)
+library(knitr)
+
+# Read the newly specified dataset
+data <- read.csv("heart_disease_data.csv")
+
+# Data cleaning and label transformation for professional visualization
+data_clean <- data %>%
+  mutate(
+    Target_Label = factor(target, levels = c(0, 1), labels = c("No Disease", "Heart Disease")),
+    Sex_Label = factor(sex, levels = c(0, 1), labels = c("Female", "Male")),
+    CP_Label = factor(cp, levels = c(0, 1, 2, 3), 
+                      labels = c("Typical Angina", "Atypical Angina", "Non-Anginal", "Asymptomatic"))
+  )
+```
+
+# Introduction
+
+Heart disease remains one of the primary drivers of mortality globally. Early diagnostic screenings and the empirical identification of major risk factors are essential pillars of preventative cardiology and public health intervention. This report evaluates a comprehensive cardiovascular dataset (`heart_disease_data.csv`) to systematically address the following research question: **Which specific clinical symptoms and demographic characteristics exhibit the strongest correlation with a positive heart disease diagnosis?**
+
+The analyzed dataset contains clinical records capturing patient age, biological sex, chest pain classification (`cp`), and the final clinical diagnostic outcome (`target`). By identifying robust correlations within these data, this study seeks to provide actionable parameters for preliminary patient triage and risk stratification workflows.
+
+# Results
+
+### 2.1 Overall Sample Distribution
+
+To contextualize the study, we first examine the total baseline distribution of diagnoses within the dataset. As illustrated in \@fig-pie, 54.5% of the individuals sampled have been diagnosed with heart disease. This relatively balanced yet positive-leaning distribution ensures that statistical indicators derived for risk groups possess adequate sample support.
+
+```{r}
+#| label: fig-pie
+#| fig-cap: "Proportional Distribution of Overall Heart Disease Diagnosis"
+#| fig-width: 4
+#| fig-height: 4
+pie_data <- data_clean %>%
+  count(Target_Label) %>%
+  mutate(fraction = n / sum(n),
+         ymax = cumsum(fraction),
+         ymin = c(0, head(ymax, n=-1)),
+         label_pos = (ymax + ymin) / 2,
+         label = paste0(Target_Label, "\n", round(fraction * 100, 1), "%"))
+
+ggplot(pie_data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=0, fill=Target_Label)) +
+  geom_rect() +
+  coord_polar(theta="y") +
+  scale_fill_manual(values = c("#2b7bba", "#d95f02")) +
+  theme_void() +
+  theme(legend.position = "none") +
+  geom_text(x=2, aes(y=label_pos, label=label), color="white", size=4, fontface="bold")
+```
+
+### 2.2 Stratification by Chest Pain Type
+
+Moving beyond baseline statistics, we evaluate clinical markers using a grouped bar chart. Stratifying the positive diagnoses across the four distinct classifications of chest pain reveals an essential trend (\@fig-bar). Patients presenting with **Atypical Angina** and **Non-Anginal Pain** demonstrate overwhelming rates of heart disease positive outcomes compared to healthy controls. Conversely, individuals experiencing traditional "Typical Angina" show a lower relative rate of heart disease within this sample.
+
+```{r}
+#| label: fig-bar
+#| fig-cap: "Heart Disease Diagnosis Stratified by Clinical Chest Pain Type"
+#| fig-width: 6
+#| fig-height: 3.5
+ggplot(data_clean, aes(x = CP_Label, fill = Target_Label)) +
+  geom_bar(position = "dodge", alpha = 0.9) +
+  scale_fill_manual(values = c("#2b7bba", "#d95f02")) +
+  labs(x = "Chest Pain Type", y = "Patient Count", fill = "Diagnostic Status") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank())
+```
+
+### 2.3 Continuous Age Analysis via Probability Density
+
+Finally, we implement a continuous density plot to examine the demographic distribution of age across both diagnostic cohorts. As displayed in \@fig-density, the probability density curve for the heart disease cohort (represented in orange) exhibits a distinct **leftward shift** relative to the healthy control group. The peak probability density for positive diagnoses is concentrated squarely within the 40 to 55 age bracket, highlighting a critical demographic window for targeted clinical screenings.
+
+```{r}
+#| label: fig-density
+#| fig-cap: "Smoothed Probability Density Distribution of Age by Diagnosis"
+#| fig-width: 6
+#| fig-height: 3.5
+ggplot(data_clean, aes(x = age, fill = Target_Label)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_manual(values = c("#2b7bba", "#d95f02")) +
+  labs(x = "Age (Years)", y = "Probability Density", fill = "Diagnostic Status") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+# Conclusion
+
+This research utilized pie chart, bar chart, and density estimations to rigorously evaluate empirical predictors of cardiovascular illness.
+
+### Key Clinical Insights:
+
+-   **Symptomatic Flags:** Non-traditional chest pain manifestations (Atypical and Non-Anginal) are statistically dominant among heart disease patients. Clinical triage protocols must treat these subjective descriptors with high diagnostic priority.
+
+-   **Age Triage Thresholds:** The probability density analysis challenges the conventional assumption that risk scales linearly into old age, establishing the 40–55 age demographic as an epidemiological hotspot within this database.
